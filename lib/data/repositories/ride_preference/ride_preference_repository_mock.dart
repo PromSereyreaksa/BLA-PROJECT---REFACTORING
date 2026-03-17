@@ -7,4 +7,9 @@ class RidePreferenceRepositoryMock implements RidePreferenceRepository {
   List<RidePreference> getRidePreferences() {
     return fakeRidePrefs;
   }
+
+  @override
+  void saveRidePreference(RidePreference preference) {
+    fakeRidePrefs.add(preference);
+  }
 }

@@ -6,6 +6,7 @@ import './data/repositories/ride/ride_repository.dart';
 import './data/repositories/ride/ride_repository_mock.dart';
 import './data/repositories/ride_preference/ride_preference_repository.dart';
 import './data/repositories/ride_preference/ride_preference_repository_mock.dart';
+import './ui/states/ride_preference_state.dart';
 
 List<InheritedProvider> get devProviders {
   return [
@@ -14,6 +15,10 @@ List<InheritedProvider> get devProviders {
       create: (_) => RidePreferenceRepositoryMock(),
     ),
     Provider<RideRepository>(create: (_) => RideRepositoryMock()),
+    Provider<RidePreferencesState>(
+      create: (_) =>
+          RidePreferencesState(repository: RidePreferenceRepositoryMock()),
+    ),
   ];
 }
 
