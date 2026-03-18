@@ -1,4 +1,3 @@
-import 'package:blabla/ui/screens/rides_selection/view_model/rides_selection_model.dart';
 import 'package:flutter/material.dart';
 import '../../../../model/ride/ride.dart';
 import '../../../theme/theme.dart';
@@ -6,8 +5,6 @@ import '../view_model/rides_selection_model.dart';
 import './rides_selection_header.dart';
 import './rides_selection_tile.dart';
 
-/// Pure view — no state, no services.
-/// All data comes from the RidesSelectionViewModel passed by the parent.
 class RidesSelectionContent extends StatelessWidget {
   final RidesSelectionViewModel viewModel;
   final VoidCallback onBackPressed;
@@ -45,9 +42,7 @@ class RidesSelectionContent extends StatelessWidget {
               onFilterPressed: onFilterPressed,
               onPreferencePressed: onPreferencePressed,
             ),
-
             const SizedBox(height: 100),
-
             Expanded(
               child: ListView.builder(
                 itemCount: viewModel.matchingRides.length,

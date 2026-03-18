@@ -1,64 +1,38 @@
 import 'package:blabla/model/ride_pref/ride_pref.dart';
+import 'package:blabla/ui/screens/home/widgets/home_content.dart';
+import 'package:blabla/ui/states/ride_preference_state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../states/ride_preference_state.dart';
+import './view_model/home_model.dart';
 import '../../../utils/animations_util.dart';
 import '../rides_selection/rides_selection_screen.dart';
-import './widgets/home_content.dart';
-import './view_model/home_model.dart';
-import '../../../data/repositories/ride/ride_repository.dart';
 
-///
-/// This screen allows user to:
-/// - Enter his/her ride preference and launch a search on it
-/// - Or select a last entered ride preferences and launch a search on it
-///
-class HomeScreen extends StatefulWidget {
-  final RidePreferencesState ridePrefState;
-  const HomeScreen({super.key, required this.ridePrefState});
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
 
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
+  Future<void> _onRidePrefSelected(
+    BuildContext context,
+    HomeViewModel homeViewModel,
+    RidePreference selectedPreference,
+  ) async {
+    homeViewModel.selectPreference(selectedPreference);
 
-class _HomeScreenState extends State<HomeScreen> {
-  late final HomeViewModel _viewModel;
-
-  @override
-  void initState() {
-    super.initState();
-    // TODO: Inject RidePrefState via provider/repository injection instead of direct access
-    _viewModel = HomeViewModel(ridePrefState: widget.ridePrefState);
-  }
-
-  @override
-  void dispose() {
-    _viewModel.dispose();
-    super.dispose();
-  }
-
-  Future<void> _onRidePrefSelected(RidePreference selectedPreference) async {
-    // 1 - Ask the view model to update the current preference
-    _viewModel.selectPreference(selectedPreference);
-    // 2 - Navigate to the rides screen
-    await Navigator.of(context).push(
-      AnimationUtils.createBottomToTopRoute(
-        RidesSelectionScreen(
-          ridePrefState: widget.ridePrefState,
-          rideRepository: context.read<RideRepository>(),
-        ),
-      ),
-    );
-    // 3 - No manual setState needed — ViewModel notifies listeners automatically
+    await Navigator.of(
+      context,
+    ).push(AnimationUtils.createBottomToTopRoute(const RidesSelectionScreen()));
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: _viewModel,
-      builder: (context, _) => HomeContent(
-        viewModel: _viewModel,
-        onRidePrefSelected: _onRidePrefSelected,
+    return ChangeNotifierProvider<HomeViewModel>(
+      create: (ctx) =>
+          HomeViewModel(ridePrefState: ctx.read<RidePreferencesState>()),
+      child: Consumer<HomeViewModel>(
+        builder: (ctx, homeViewModel, child) => HomeContent(
+          viewModel: homeViewModel,
+          onRidePrefSelected: (selectedPreference) =>
+              _onRidePrefSelected(ctx, homeViewModel, selectedPreference),
+        ),
       ),
     );
   }

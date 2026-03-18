@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../data/repositories/ride/ride_repository.dart';
+import '../../../model/ride/ride.dart';
 import '../../../model/ride_pref/ride_pref.dart';
 import '../../states/ride_preference_state.dart';
 import '../../../utils/animations_util.dart';
@@ -7,45 +9,10 @@ import './widgets/rides_selection_content.dart';
 import './view_model/rides_selection_model.dart';
 import 'widgets/ride_preference_modal.dart';
 
-///
-///  The Ride Selection screen allows user to select a ride, once ride preferences have been defined.
-///  The screen also allow user to:
-///   -  re-define the ride preferences
-///   -  activate some filters.
-///
-class RidesSelectionScreen extends StatefulWidget {
-  final RidePreferencesState ridePrefState;
-  final RideRepository rideRepository;
+class RidesSelectionScreen extends StatelessWidget {
+  const RidesSelectionScreen({super.key});
 
-  const RidesSelectionScreen({
-    super.key,
-    required this.ridePrefState,
-    required this.rideRepository,
-  });
-
-  @override
-  State<RidesSelectionScreen> createState() => _RidesSelectionScreenState();
-}
-
-class _RidesSelectionScreenState extends State<RidesSelectionScreen> {
-  late final RidesSelectionViewModel _viewModel;
-
-  @override
-  void initState() {
-    super.initState();
-    _viewModel = RidesSelectionViewModel(
-      ridePrefState: widget.ridePrefState,
-      rideRepository: widget.rideRepository,
-    );
-  }
-
-  @override
-  void dispose() {
-    _viewModel.dispose();
-    super.dispose();
-  }
-
-  void onBackTap() {
+  void onBackTap(BuildContext context) {
     Navigator.pop(context);
   }
 
@@ -53,37 +20,44 @@ class _RidesSelectionScreenState extends State<RidesSelectionScreen> {
     // TODO
   }
 
-  void onRideSelected(ride) {
-    // Later
+  void onRideSelected(Ride ride) {
+    // TODO
   }
 
-  Future<void> onPreferencePressed() async {
-    // 1 - Navigate to the ride preference picker
-    RidePreference? newPreference = await Navigator.of(context)
+  Future<void> onPreferencePressed(
+    BuildContext context,
+    RidesSelectionViewModel viewModel,
+  ) async {
+    final currentPreference = viewModel.currentPreference;
+    if (currentPreference == null) return;
+
+    final RidePreference? newPreference = await Navigator.of(context)
         .push<RidePreference>(
           AnimationUtils.createRightToLeftRoute(
-            RidePreferenceModal(
-              initialPreference: _viewModel.currentPreference!,
-            ),
+            RidePreferenceModal(initialPreference: currentPreference),
           ),
         );
+
     if (newPreference != null) {
-      // 2 - Ask the view model to update the current preference
-      _viewModel.selectPreference(newPreference);
-      // 3 - No manual setState needed — ViewModel notifies listeners automatically
+      viewModel.selectPreference(newPreference);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: _viewModel,
-      builder: (context, _) => RidesSelectionContent(
-        viewModel: _viewModel,
-        onBackPressed: onBackTap,
-        onFilterPressed: onFilterPressed,
-        onRideSelected: onRideSelected,
-        onPreferencePressed: onPreferencePressed,
+    return ChangeNotifierProvider<RidesSelectionViewModel>(
+      create: (ctx) => RidesSelectionViewModel(
+        ridePrefState: ctx.read<RidePreferencesState>(),
+        rideRepository: ctx.read<RideRepository>(),
+      ),
+      child: Consumer<RidesSelectionViewModel>(
+        builder: (ctx, viewModel, child) => RidesSelectionContent(
+          viewModel: viewModel,
+          onBackPressed: () => onBackTap(ctx),
+          onFilterPressed: onFilterPressed,
+          onRideSelected: onRideSelected,
+          onPreferencePressed: () => onPreferencePressed(ctx, viewModel),
+        ),
       ),
     );
   }
