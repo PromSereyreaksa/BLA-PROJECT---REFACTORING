@@ -1,10 +1,12 @@
 import 'package:blabla/model/ride_pref/ride_pref.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../states/ride_preference_state.dart';
 import '../../../utils/animations_util.dart';
 import '../rides_selection/rides_selection_screen.dart';
 import './widgets/home_content.dart';
 import './view_model/home_model.dart';
+import '../../../data/repositories/ride/ride_repository.dart';
 
 ///
 /// This screen allows user to:
@@ -39,9 +41,14 @@ class _HomeScreenState extends State<HomeScreen> {
     // 1 - Ask the view model to update the current preference
     _viewModel.selectPreference(selectedPreference);
     // 2 - Navigate to the rides screen
-    await Navigator.of(
-      context,
-    ).push(AnimationUtils.createBottomToTopRoute(RidesSelectionScreen()));
+    await Navigator.of(context).push(
+      AnimationUtils.createBottomToTopRoute(
+        RidesSelectionScreen(
+          ridePrefState: widget.ridePrefState,
+          rideRepository: context.read<RideRepository>(),
+        ),
+      ),
+    );
     // 3 - No manual setState needed — ViewModel notifies listeners automatically
   }
 
