@@ -27,4 +27,6 @@ class RidePreferencesState extends ChangeNotifier {
   void _addPreferenceToHistory(RidePreference preference) {
     _ridePreferenceRepository.saveRidePreference(preference);
   }
+
+  
 }
